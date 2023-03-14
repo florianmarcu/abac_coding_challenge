@@ -31,10 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   provider:
-  # flutter_calendar_week:
-  # horizontal_week_calendar:
-  # syncfusion_flutter_calendar:
-  # table_calendar:
+  table_calendar:
 
 dev_dependencies:
   flutter_test:

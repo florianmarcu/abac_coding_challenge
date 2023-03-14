@@ -1,11 +1,14 @@
 import 'package:abac_coding_challenge/screens/repair_spaceship/repair_spaceship_provider.dart';
 import 'package:flutter/material.dart';
 
+/// First screen of the app
+/// A wrapper screen around the Stepper
 class RepairSpaceshipPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var provider = context.watch<RepairSpaceshipPageProvider>();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.only(top: 30.0),
         child: Column(

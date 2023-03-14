@@ -1,7 +1,8 @@
 import 'package:abac_coding_challenge/screens/repair_spaceship/repair_spaceship_provider.dart';
 import 'package:flutter/material.dart';
 
-/// Spaceship parts table with add or remove capabilites 
+/// Widget for the first step of the Stepper
+/// Contains a table with add or remove capabilites 
 class RepairSpaceshipStepChangeParts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -53,7 +54,7 @@ class RepairSpaceshipStepChangeParts extends StatelessWidget {
         ListView(
           padding: EdgeInsets.zero,
           shrinkWrap: true,
-          children: provider.parts.map((part) => Stack(
+          children: provider.selectedParts.map((part) => Stack(
             children: [
               Container(
                 decoration: BoxDecoration(
@@ -129,14 +130,14 @@ class RepairSpaceshipStepChangeParts extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => provider.addPart(),
+                      onTap: () => provider.addPart(context),
                       child: Icon(Icons.add_circle_outlined,),
                     )
                   ],
                 ),
               ),
-              Expanded(flex: 2,child: Container()),
-              Expanded(flex: 1,child: Container()),
+              Spacer(flex: 2,),
+              Spacer(flex: 1,)
             ],
           ),
         )

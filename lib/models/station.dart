@@ -3,6 +3,7 @@ class Station{
   double price;
   Map<String, dynamic> schedule;
   int eta;
+  double rating;
   
   static Map<String, dynamic> get normalSchedule => {
     "monday": {
@@ -35,5 +36,5 @@ class Station{
     },
   };
   
-  Station({required this.name,required this.price,required this.schedule,required this.eta});
+  Station({required this.name, required this.price, required this.schedule, required this.eta, required this.rating});
 }

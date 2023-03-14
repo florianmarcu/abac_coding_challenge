@@ -8,10 +8,13 @@ void main() {
   runApp(const Main());
 }
 
+
+/// Starting point of the app
+/// The 'home' screen is the 'RepairSpaceshipPage' which contains the Stepper
+/// The project follows a 'folder-by-feature' structure, every feature of the app having its own folder for the UI and business logic
 class Main extends StatelessWidget {
   const Main({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

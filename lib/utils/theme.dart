@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 
 Color _tertiaryColor = Color(0xFF3E363F);
 Color _highlightColor = Colors.white;
-Color _primaryColor = Color(0xFF2292A4);
-Color _secondaryColor = Color(0xFFDD403A);
-/// The color of the text, used in TextTheme
-Color _textColor = _tertiaryColor;
-// Color _textColor = Colors.black;
-// Color _splashColor = Color(0xFF95b1db);
-Color _splashColor = Colors.grey[300]!;
-Color _canvasColor = Color(0xFFF5EFED);
+Color _primaryColor = Color(0xFF821616);
+Color _secondaryColor = Color(0xFF1a871a);
 
+
+/// Theme of the app
+/// Defined as a function in order to use the BuildContext. Used to ignore the text scale factor chosen by the user (avoids UI problems short-term)
 ThemeData theme(BuildContext context){
   return ThemeData(
+    highlightColor: _highlightColor,
     textTheme: _textTheme(context),
     colorScheme: _colorScheme
   );

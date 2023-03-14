@@ -1,9 +1,14 @@
 import 'package:abac_coding_challenge/models/models.dart';
+import 'package:abac_coding_challenge/screens/pick_station/pick_station_page.dart';
+import 'package:abac_coding_challenge/screens/pick_station/pick_station_provider.dart';
 import 'package:abac_coding_challenge/screens/repair_spaceship/components/repair_spaceship_step_change_parts.dart';
 import 'package:abac_coding_challenge/screens/repair_spaceship/components/repair_spaceship_step_select_date.dart';
+import 'package:abac_coding_challenge/utils/utils.dart';
 import 'package:flutter/material.dart';
 export 'package:provider/provider.dart';
 
+/// Provider class for the 'RepairSpaceshipPage'
+/// Handles all business logic behind the 'RepairSpaceshipPage' screen
 class RepairSpaceshipPageProvider with ChangeNotifier{
   List<Step> steps = [
     Step(
@@ -38,36 +43,10 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
       pricePerUnit: 300,
     )
   ];
-
-  List<Station> availableStations = [
-    Station(
-      name: "Station 1",
-      price: 300,
-      schedule: Station.normalSchedule,
-      eta: 180
-    ),
-    Station(
-      name: "Station 2",
-      price: 400,
-      schedule: Station.normalSchedule,
-      eta: 150
-    ),
-    Station(
-      name: "Station 3",
-      price: 500,
-      schedule: Station.normalSchedule,
-      eta: 120
-    ),
-    Station(
-      name: "Station 4",
-      price: 600,
-      schedule: Station.normalSchedule,
-      eta: 90
-    ),
-  ];
-
   DateTime today = DateTime.now().toLocal();
-  DateTime selectedDate = DateTime.now().toLocal();
+  DateTime selectedDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, DateTime.now().toLocal().day);
+  DateTime focusedDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, DateTime.now().toLocal().day);
+  int selectedHour = 0; /// The index of the selected hour (starting from the first hour of the schedule "08:00")
   // int 
   int displayedMonth = DateTime.now().toLocal().month;
   int displayedYear = DateTime.now().toLocal().year;
@@ -80,17 +59,9 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
   // CalendarWeekController calendarWeekController = CalendarWeekController();
 
 
-  List<PartOrderItem> parts = [];
+  List<PartOrderItem> selectedParts = [];
 
-  RepairSpaceshipPageProvider(){
-    getData();
-  }
-
-  void getData(){
-    _loading();
-
-    _loading();
-  }
+  RepairSpaceshipPageProvider();
 
   void updateActiveStep(int index){
     for (var i = 0; i < steps.length; i++) {
@@ -123,7 +94,7 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
   }
 
   void removePart(PartOrderItem part){
-    parts.remove(part);
+    selectedParts.remove(part);
 
     notifyListeners();
   }
@@ -142,11 +113,17 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
     notifyListeners();
   }
 
-  void addPart(){
+  void addPart(BuildContext context){
     if(formKey.currentState != null){
       if(formKey.currentState!.validate()){
-        var part = availableParts.firstWhere((part) => currentPartName == part.name);
-        parts.add(PartOrderItem(name: currentPartName, quantity: currentPartQuantity, pricePerUnit: part.pricePerUnit, totalPrice: part.pricePerUnit * currentPartQuantity));
+        if(!selectedParts.any((pastOrderItem) => pastOrderItem.name == currentPartName)){
+          var part = availableParts.firstWhere((part) => currentPartName == part.name);
+          selectedParts.add(PartOrderItem(name: currentPartName, quantity: currentPartQuantity, pricePerUnit: part.pricePerUnit, totalPrice: part.pricePerUnit * currentPartQuantity));
+        }
+        else {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Componenta se afla deja pe lista"),));
+        }
       }
     }
 
@@ -171,6 +148,30 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
   }
 
   void onDateChanged(DateTime date){}
+
+  bool checkDateAvailable(int index, String weekday){
+    var weekdayIndex = kWeekdayToIndex[weekday]!;
+    var newDate = DateTime(focusedDate.year, focusedDate.month, focusedDate.day)
+    .add(Duration(days: weekdayIndex - focusedDate.weekday + 1));
+    if(today.difference(newDate) >= Duration(days: 1)){
+      return false;
+    }
+    return true;
+  }
+
+  void updateSelectedDate(int index, String weekday){
+    selectedHour = index;
+    var weekdayIndex = kWeekdayToIndex[weekday]!;
+    selectedDate = DateTime(focusedDate.year, focusedDate.month, focusedDate.day)
+    .add(Duration(days: weekdayIndex - focusedDate.weekday + 1));
+    notifyListeners();
+  }
+
+  void updateFocusedDate(DateTime focusedDay){
+    focusedDate = DateTime(focusedDay.year, focusedDay.month, focusedDay.day);
+
+    notifyListeners(); 
+  }
 
   String? validatePartName(String? partName){
     try{
@@ -202,7 +203,7 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
           ),
           TextButton(
             child: Text("CREEAZĂ"),
-            onPressed: () => finishStepper(),
+            onPressed: () => finishStepper(context),
           )
         ],
       );
@@ -212,7 +213,7 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
         children: [
           TextButton(
             child: Text("CREEAZĂ"),
-            onPressed: () => finishStepper(),
+            onPressed: () => finishStepper(context),
           )
         ],
       );
@@ -244,14 +245,22 @@ class RepairSpaceshipPageProvider with ChangeNotifier{
     }
   }
 
-  finishStepper(){
-
-  }
-
-  /// Method that notifies the page that the app is processing data
-  _loading(){
-    isLoading = !isLoading;
-
-    notifyListeners();
+  finishStepper(BuildContext context){
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => ChangeNotifierProvider(
+        create: (_) => PickStationPageProvider(
+            selectedParts, /// The 'parts' selected by the user
+            DateTime( /// The 'date' selected by the user
+              selectedDate.year,
+              selectedDate.month,
+              selectedDate.day,
+              int.parse(Station.normalSchedule[Station.normalSchedule.keys.toList()[selectedDate.weekday - 1]]['start-hour'].substring(0,2)) + selectedHour
+            ),
+            2007, /// The spaceship's manufacturing year (hardcoded)
+            "SEAT Ibiza" /// The spaceship's name (hardcoded)
+        ),
+         child: PickStationPage(),
+      )
+    ));
   }
 }
